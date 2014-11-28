@@ -7,7 +7,7 @@
 #
 # All Rights Reserved
 #
-CXX = g++ -Wall -pedantic
+CXX = g++ -g -Wall -pedantic
 
 TARGET = stepc
 
@@ -17,10 +17,10 @@ OBJS = $(SOURCES:.cpp=.o)
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) -g -o $(TARGET) $(OBJS)
+	$(CXX) -o $(TARGET) $(OBJS)
 
 %.o: %.c
-	$(CXX) -g -c $< -o $@
+	$(CXX) -c $< -o $@
 
 .PHONY clean:
 	rm -f $(TARGET) $(OBJS)

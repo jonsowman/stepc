@@ -42,7 +42,9 @@ class PIDController: public Controller
         : Controller(sys)
         {
             // Size the target vector
-            _target.resize(sys->getNumOutputs());
+            this->_target.resize(sys->getNumOutputs());
+            this->integrator.resize(sys->getNumOutputs());
+            this->old_error.resize(sys->getNumOutputs());
         }
 
         // Destroy a PIDController
@@ -51,12 +53,26 @@ class PIDController: public Controller
         virtual blas::vector<double> controlMove(const blas::vector<double> y);
 
         void setTarget(const blas::vector<double> target);
-        void setPropGain(const blas::vector<double> kp);
+        void setPropGain(const double kp);
+        void setIntGain(const double ki);
+        void setDiffGain(const double kd);
 
     private:
         /// A reference vector for the inputs
         blas::vector<double> _target;
         
-        /// A vector of K_p gains
-        blas::vector<double> _kp;
+        /// K_p gains
+        double _kp;
+
+        /// K_i gains
+        double _ki;
+
+        /// K_d gains
+        double _kd;
+
+        /// Integrator for K_i gain
+        blas::vector<double> integrator;
+
+        /// Retain one past error for the K_d term
+        blas::vector<double> old_error;
 };

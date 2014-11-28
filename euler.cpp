@@ -56,9 +56,7 @@ int main(void)
     pid.setTarget(target);
 
     // Set proportional gain
-    blas::vector<double> kp(1);
-    kp(0) = 0.1;
-    pid.setPropGain(kp);
+    pid.setPropGain(0.1);
 
     // Create a fixed timestep simulator
     Simulator Sim;

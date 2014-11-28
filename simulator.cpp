@@ -29,10 +29,10 @@ blas::vector<double> Simulator::simulate(LinSystem *sys,
         blas::vector<double> x, Controller *controller)
 {
     // Contain the control input vector
-    blas::vector<double> u(1);
+    blas::vector<double> u(sys->getNumInputs());
 
     // Contain the system output
-    blas::vector<double> y(1);
+    blas::vector<double> y(sys->getNumOutputs());
 
     // Sanity check simulation parameters
     if(_ts == 0.0 || _endtime == 0.0 || _ts > _endtime)

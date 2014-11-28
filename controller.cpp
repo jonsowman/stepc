@@ -39,13 +39,22 @@ blas::vector<double> Controller::controlMove(const blas::vector<double> y)
  */
 blas::vector<double> PIDController::controlMove(const blas::vector<double> y)
 {
-    blas::vector<double> u(1), e(1);
+    blas::vector<double> u(1);
+    blas::vector<double> e(1);
 
     // Find error signal
-    e = y - _target;
+    e = y - this->_target;
 
-    // A simple P-controller only
-    u = _kp;
+    // Add error to the integrator
+    this->integrator += e;
+
+    // Calculate the control action in PID fashion
+    u = (this->_kp * e);
+    u += (this->integrator * this->_ki);
+    u += (this->_kd * (e - this->old_error));
+
+    // Store old error
+    this->old_error = e;
 
     // Return the input vector
     return u;
@@ -56,7 +65,17 @@ void PIDController::setTarget(const blas::vector<double> target)
     _target = target;
 }
 
-void PIDController::setPropGain(const blas::vector<double> kp)
+void PIDController::setPropGain(const double kp)
 {
     _kp = kp;
+}
+
+void PIDController::setIntGain(const double ki)
+{
+    _ki = ki;
+}
+
+void PIDController::setDiffGain(const double kd)
+{
+    _kd = kd;
 }
