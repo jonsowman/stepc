@@ -48,7 +48,7 @@ int main(void)
     sys.C(0,1) = 0;
 
     // Make a controller
-    PIDController pid(sys);
+    PIDController pid(&sys);
 
     // Set target
     blas::vector<double> target(1);
@@ -66,7 +66,7 @@ int main(void)
     Sim.setEndTime(10);
 
     // Simulate 'sys' from our initial state 'x'
-    x = Sim.simulate(sys, x, pid);
+    x = Sim.simulate(&sys, x, &pid);
 
     // Final
     std::cout << "Final state is: [" << x(0) 

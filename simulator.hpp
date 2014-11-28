@@ -35,8 +35,8 @@ class Simulator
             _endtime = EndTime;
     }
 
-    blas::vector<double> simulate(LinSystem sys, 
-            blas::vector<double> x, Controller controller);
+    blas::vector<double> simulate(LinSystem *sys, 
+            blas::vector<double> x, Controller *controller);
 
     private:
         double _ts;

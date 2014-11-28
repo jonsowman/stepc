@@ -25,8 +25,8 @@ namespace blas = boost::numeric::ublas;
  * @param x The initial state vector for the system to be simulated
  * @returns The final state
  */
-blas::vector<double> Simulator::simulate(LinSystem sys, 
-        blas::vector<double> x, Controller controller)
+blas::vector<double> Simulator::simulate(LinSystem *sys, 
+        blas::vector<double> x, Controller *controller)
 {
     // Contain the control input vector
     blas::vector<double> u(1);
@@ -45,13 +45,13 @@ blas::vector<double> Simulator::simulate(LinSystem sys,
     for(double i = 0.0; i<=_endtime; i+=_ts)
     {
         // Find the system output 'y'
-        y = prod(sys.C, x);
+        y = prod(sys->C, x);
 
         // Find the control move by asking the Controller to compute
-        u = controller.controlMove(y);
+        u = controller->controlMove(y);
 
         // xdot = Ax + Bu
-        blas::vector<double> xdot = prod(sys.A, x) + prod(sys.B, u);
+        blas::vector<double> xdot = prod(sys->A, x) + prod(sys->B, u);
 
         // Integrate using forwards Euler (could do better here)
         x = x + _ts * xdot;

@@ -21,7 +21,7 @@ namespace blas = boost::numeric::ublas;
 class Controller
 {
     public:
-        Controller(LinSystem sys)
+        Controller(LinSystem *sys)
             : _sys(sys)
         {}
 
@@ -31,18 +31,18 @@ class Controller
         virtual blas::vector<double> controlMove(const blas::vector<double> y);
 
     private:
-        const LinSystem _sys;
+        const LinSystem *_sys;
 };
 
 class PIDController: public Controller
 {
     public:
         // Create a PIDController and call the Controller constructor
-        PIDController(LinSystem sys)
+        PIDController(LinSystem *sys)
         : Controller(sys)
         {
             // Size the target vector
-            _target.resize(sys.getNumOutputs());
+            _target.resize(sys->getNumOutputs());
         }
 
         // Destroy a PIDController
