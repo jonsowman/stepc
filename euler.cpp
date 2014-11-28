@@ -27,7 +27,7 @@ int main(void)
     std::cout << "------ STEPC ------" << std::endl;
     blas::vector<double> x(2);
 
-    x(0) = 1.0;
+    x(0) = -1.0;
     x(1) = 0.0;
 
     // Create linear system of order 2 and 1 input and 1 output

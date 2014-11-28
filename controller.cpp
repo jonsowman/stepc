@@ -43,7 +43,7 @@ blas::vector<double> PIDController::controlMove(const blas::vector<double> y)
     blas::vector<double> e(1);
 
     // Find error signal
-    e = y - this->_target;
+    e = this->_target - y;
 
     // Add error to the integrator
     this->integrator += e;
