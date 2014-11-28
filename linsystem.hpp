@@ -24,6 +24,14 @@ class LinSystem
         LinSystem(const int order, const int numinputs, const int numoutputs)
             : _order(order), _numinputs(numinputs), _numoutputs(numoutputs)
         {
+            // Check that the defined system topology is acceptable
+            // Having no inputs (an autonomous system) is OK
+            if(order == 0 || numoutputs == 0)
+            {
+                std::cout << "System must have at least 1 state and 1 output"
+                    << std::endl;
+                return;
+            }
             this->A.resize(order, order);
             this->B.resize(order, numinputs);
             this->C.resize(numoutputs, order);
