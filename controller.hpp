@@ -25,8 +25,25 @@ class Controller
             : _sys(sys)
         {}
 
-        blas::vector<double> controlmove(const blas::vector<double> y);
+        virtual ~Controller() {}
+
+        // Different controllers implement this differently
+        virtual blas::vector<double> controlmove(const blas::vector<double> y);
 
     private:
         const LinSystem _sys;
+};
+
+class PIDController: public Controller
+{
+    public:
+        // Create a PIDController and call the Controller constructor
+        PIDController(LinSystem sys)
+        : Controller(sys)
+        {}
+
+        // Destroy a PIDController
+        ~PIDController() {}
+
+        virtual blas::vector<double> controlmove(const blas::vector<double> y);
 };

@@ -47,6 +47,9 @@ int main(void)
     sys.C(0,0) = 1;
     sys.C(0,1) = 0;
 
+    // Make a controller
+    PIDController pid(sys);
+
     // Create a fixed timestep simulator
     Simulator Sim;
     Sim.setTimestep(0.001);

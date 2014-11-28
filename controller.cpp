@@ -20,12 +20,24 @@
 namespace blas = boost::numeric::ublas;
 
 /**
+ * This method returns a null control move, since all controllers should be
+ * derived classes
+ * @warning You should not be using this method!
+ * @param y A LinSystem output vector
+ * @return A null vector.
+ */
+blas::vector<double> Controller::controlmove(const blas::vector<double> y)
+{
+    return y * 0;
+}
+
+/**
  * Given a system output y, compute a control move.
  * @param y The current system output
  * @returns A control vector u that will be applied to the system at the next
  * timestep by the Simulator
  */
-blas::vector<double> controlmove(const blas::vector<double> y)
+blas::vector<double> PIDController::controlmove(const blas::vector<double> y)
 {
     blas::vector<double> x;
     x = 0.1 * y;
