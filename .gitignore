@@ -27,3 +27,7 @@
 *.out
 *.app
 stepc
+
+# Damn you vim
+*.swp
+*.swo
