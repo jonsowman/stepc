@@ -18,6 +18,7 @@
 // Project local
 #include "simulator.hpp"
 #include "linsystem.hpp"
+#include "controller.hpp"
 
 namespace blas = boost::numeric::ublas;
 

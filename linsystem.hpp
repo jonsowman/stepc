@@ -22,15 +22,24 @@ class LinSystem
          * @param numoutputs The number of outputs of the linear system
          */
         LinSystem(const int order, const int numinputs, const int numoutputs)
+            : _order(order), _numinputs(numinputs), _numoutputs(numoutputs)
         {
             A.resize(order, order);
             B.resize(order, numinputs);
             C.resize(numoutputs, order);
         }
 
+        // Documentation is in the .cpp file
+        int getOrder(void);
+        int getNumInputs(void);
+        int getNumOutputs(void);
+
         // Define the system matrices
         // Assume D=0 for systems simulated by stepc
         blas::matrix<double> A;
         blas::matrix<double> B;
         blas::matrix<double> C;
+
+    private:
+        const int _order, _numinputs, _numoutputs;
 };
