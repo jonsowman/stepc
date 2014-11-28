@@ -23,7 +23,7 @@ namespace blas = boost::numeric::ublas;
  */
 int LinSystem::getOrder(void)
 {
-    return _order;
+    return this->_order;
 }
 
 /**
@@ -32,7 +32,7 @@ int LinSystem::getOrder(void)
  */
 int LinSystem::getNumInputs(void)
 {
-    return _numinputs;
+    return this->_numinputs;
 }
 
 /**
@@ -41,5 +41,5 @@ int LinSystem::getNumInputs(void)
  */
 int LinSystem::getNumOutputs(void)
 {
-    return _numoutputs;
+    return this->_numoutputs;
 }

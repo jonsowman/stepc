@@ -26,13 +26,13 @@ class Simulator
     void setTimestep(double Ts)
     {
         if(Ts != 0.0)
-            _ts = Ts;
+            this->_ts = Ts;
     }
 
     void setEndTime(double EndTime)
     {
         if(EndTime != 0.0)
-            _endtime = EndTime;
+            this->_endtime = EndTime;
     }
 
     blas::vector<double> simulate(LinSystem *sys, 

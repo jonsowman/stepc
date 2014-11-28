@@ -24,9 +24,9 @@ class LinSystem
         LinSystem(const int order, const int numinputs, const int numoutputs)
             : _order(order), _numinputs(numinputs), _numoutputs(numoutputs)
         {
-            A.resize(order, order);
-            B.resize(order, numinputs);
-            C.resize(numoutputs, order);
+            this->A.resize(order, order);
+            this->B.resize(order, numinputs);
+            this->C.resize(numoutputs, order);
         }
 
         // Documentation is in the .cpp file

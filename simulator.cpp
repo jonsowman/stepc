@@ -35,14 +35,14 @@ blas::vector<double> Simulator::simulate(LinSystem *sys,
     blas::vector<double> y(sys->getNumOutputs());
 
     // Sanity check simulation parameters
-    if(_ts == 0.0 || _endtime == 0.0 || _ts > _endtime)
+    if(this->_ts == 0.0 || this->_endtime == 0.0 || this->_ts > this->_endtime)
     {
         std::cout << "Sim params don't make sense!" << std::endl;
         return x;
     }
 
     // Step in time
-    for(double i = 0.0; i<=_endtime; i+=_ts)
+    for(double i = 0.0; i <= this->_endtime; i += this->_ts)
     {
         // Find the system output 'y'
         y = prod(sys->C, x);
@@ -51,10 +51,11 @@ blas::vector<double> Simulator::simulate(LinSystem *sys,
         u = controller->controlMove(y);
 
         // xdot = Ax + Bu
-        blas::vector<double> xdot = prod(sys->A, x) + prod(sys->B, u);
+        blas::vector<double> xdot = prod(sys->A, x) 
+            + prod(sys->B, u);
 
         // Integrate using forwards Euler (could do better here)
-        x = x + _ts * xdot;
+        x = x + (this->_ts * xdot);
     }
     return x;
 }
