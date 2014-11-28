@@ -17,10 +17,10 @@ OBJS = $(SOURCES:.cpp=.o)
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) -o $(TARGET) $(OBJS)
+	$(CXX) -g -o $(TARGET) $(OBJS)
 
 %.o: %.c
-	$(CXX) -c $< -o $@
+	$(CXX) -g -c $< -o $@
 
 .PHONY clean:
 	rm -f $(TARGET) $(OBJS)

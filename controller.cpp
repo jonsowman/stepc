@@ -26,7 +26,7 @@ namespace blas = boost::numeric::ublas;
  * @param y A LinSystem output vector
  * @return A null vector.
  */
-blas::vector<double> Controller::controlmove(const blas::vector<double> y)
+blas::vector<double> Controller::controlMove(const blas::vector<double> y)
 {
     return y * 0;
 }
@@ -37,9 +37,26 @@ blas::vector<double> Controller::controlmove(const blas::vector<double> y)
  * @returns A control vector u that will be applied to the system at the next
  * timestep by the Simulator
  */
-blas::vector<double> PIDController::controlmove(const blas::vector<double> y)
+blas::vector<double> PIDController::controlMove(const blas::vector<double> y)
 {
-    blas::vector<double> x;
-    x = 0.1 * y;
-    return x;
+    blas::vector<double> u(1), e(1);
+
+    // Find error signal
+    e = y - _target;
+
+    // A simple P-controller only
+    u = _kp;
+
+    // Return the input vector
+    return u;
+}
+
+void PIDController::setTarget(const blas::vector<double> target)
+{
+    _target = target;
+}
+
+void PIDController::setPropGain(const blas::vector<double> kp)
+{
+    _kp = kp;
 }

@@ -50,13 +50,23 @@ int main(void)
     // Make a controller
     PIDController pid(sys);
 
+    // Set target
+    blas::vector<double> target(1);
+    target(0) = 0;
+    pid.setTarget(target);
+
+    // Set proportional gain
+    blas::vector<double> kp(1);
+    kp(0) = 0.1;
+    pid.setPropGain(kp);
+
     // Create a fixed timestep simulator
     Simulator Sim;
     Sim.setTimestep(0.001);
     Sim.setEndTime(10);
 
     // Simulate 'sys' from our initial state 'x'
-    x = Sim.simulate(sys, x);
+    x = Sim.simulate(sys, x, pid);
 
     // Final
     std::cout << "Final state is: [" << x(0) 

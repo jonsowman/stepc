@@ -15,6 +15,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 
 #include "linsystem.hpp"
+#include "controller.hpp"
 
 namespace blas = boost::numeric::ublas;
 
@@ -34,7 +35,8 @@ class Simulator
             _endtime = EndTime;
     }
 
-    blas::vector<double> simulate(LinSystem sys, blas::vector<double> x);
+    blas::vector<double> simulate(LinSystem sys, 
+            blas::vector<double> x, Controller controller);
 
     private:
         double _ts;
