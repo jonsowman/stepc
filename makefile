@@ -7,7 +7,11 @@
 #
 # All Rights Reserved
 #
-CXX = g++ -g -Wall -pedantic
+
+GIT_VERSION := $(shell git describe --always --dirty)
+
+CXX = g++
+CXXFLAGS = -g -Wall -pedantic -DGIT_VERSION=\"$(GIT_VERSION)\"
 
 TARGET = stepc
 
@@ -17,10 +21,10 @@ OBJS = $(SOURCES:.cpp=.o)
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) -o $(TARGET) $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
 %.o: %.c
-	$(CXX) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 .PHONY clean:
 	rm -f $(TARGET) $(OBJS)

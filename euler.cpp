@@ -25,6 +25,7 @@ namespace blas = boost::numeric::ublas;
 int main(void)
 {
     std::cout << "------ STEPC ------" << std::endl;
+    printf("Version: %s\n", GIT_VERSION);
     blas::vector<double> x(2);
 
     x(0) = -1.0;
