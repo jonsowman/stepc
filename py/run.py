@@ -5,10 +5,14 @@
 # Jon Sowman 2014 <j.sowman@soton.ac.uk>
 
 import numpy as np
+import subprocess
 
 from linsystem import LinSystem
 from simulator import Simulator
 from controller import PIDController
+
+git_version = subprocess.check_output(["git", "describe", "--dirty", "--always"])
+print "+++++ STEPC (Version %s) +++++" % git_version.strip()
 
 # Create the system
 sys = LinSystem(2, 1, 1)
@@ -31,7 +35,7 @@ pid.set_target(np.matrix(0))
 
 # Make a simulator and set parms
 sim = Simulator()
-sim.timestep = 0.01
+sim.timestep = 0.001
 sim.endtime = 10
 
 # Initial condition
