@@ -11,7 +11,8 @@ from linsystem import LinSystem
 from simulator import Simulator
 from controller import PIDController
 
-git_version = subprocess.check_output(["git", "describe", "--dirty", "--always"])
+git_version = subprocess.check_output(["git", "describe", "--dirty",
+                                      "--always"])
 print "+++++ STEPC (Version %s) +++++" % git_version.strip()
 
 # Create the system
@@ -45,4 +46,4 @@ x0 = np.matrix([[-1], [0]])
 x = sim.simulate(sys, x0, pid)
 
 # Results
-print "Final state is [%.5f, %.5f]" % (x[0], x[1])
+print "Final state is [%.6f, %.5f]" % (x[0], x[1])

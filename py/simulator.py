@@ -6,8 +6,8 @@
 
 import numpy as np
 
-class Simulator:
 
+class Simulator:
     timestep = 0
     endtime = 0
 
@@ -24,7 +24,7 @@ class Simulator:
         i = 0
         while(i < self.endtime):
             # Get the system output
-            y = np.dot(sys.C, x);
+            y = np.dot(sys.C, x)
 
             # What does the controller want to do
             u = controller.controlmove(y)

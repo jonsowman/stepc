@@ -8,6 +8,7 @@ import numpy as np
 
 from linsystem import LinSystem
 
+
 class Controller:
     def __init__(self):
         self.sys = 0
@@ -34,7 +35,7 @@ class PIDController(Controller):
         """
 
         # Find the current error
-        e = self.target  - y
+        e = self.target - y
 
         # Accumulate the error over time
         self.integrator += e
