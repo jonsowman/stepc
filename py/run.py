@@ -36,8 +36,8 @@ pid.set_target(np.matrix(0))
 
 # Make a simulator and set parms
 sim = Simulator()
-sim.timestep = 0.001
-sim.endtime = 10
+sim.set_timestep(0.001)
+sim.set_endtime(10)
 
 # Initial condition
 x0 = np.matrix([[-1], [0]])

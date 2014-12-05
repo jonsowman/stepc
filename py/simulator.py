@@ -8,8 +8,8 @@ import numpy as np
 
 
 class Simulator:
-    timestep = 0
-    endtime = 0
+    __timestep = 0
+    __endtime = 0
 
     def simulate(self, sys, x0, controller):
         """
@@ -21,13 +21,13 @@ class Simulator:
         """
 
         # Check that parameters are OK
-        if(self.timestep == 0):
+        if(self.__timestep == 0):
             raise ValueError("Simulation timestep has not been set")
 
-        if(self.endtime == 0):
+        if(self.__endtime == 0):
             raise ValueError("Simulator end time has not been set")
 
-        if(self.timestep > self.endtime):
+        if(self.__timestep > self.__endtime):
             raise ValueError("Simulator end time must be larger than \
                             the timestep")
 
@@ -36,7 +36,7 @@ class Simulator:
 
         # Step through time
         i = 0
-        while(i < self.endtime):
+        while(i < self.__endtime):
             # Get the system output
             y = np.dot(sys.C, x)
 
@@ -48,9 +48,15 @@ class Simulator:
             xdot += np.dot(sys.B, u)
 
             # Forwards Euler
-            x = x + self.timestep * xdot
+            x = x + self.__timestep * xdot
 
             # Increment timestep
-            i += self.timestep
+            i += self.__timestep
 
         return x
+
+    def set_timestep(self, timestep):
+        self.__timestep = timestep
+
+    def set_endtime(self, endtime):
+        self.__endtime = endtime
