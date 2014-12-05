@@ -11,7 +11,7 @@ class Simulator:
     timestep = 0
     endtime = 0
 
-    def simulate(self, sys, x0):
+    def simulate(self, sys, x0, controller):
         # Check that parameters are OK
         if(self.timestep == 0 or self.endtime == 0):
             print "Simulation timestep or end time are wrong"
@@ -26,8 +26,12 @@ class Simulator:
             # Get the system output
             y = np.dot(sys.C, x);
 
+            # What does the controller want to do
+            u = controller.controlmove(y)
+
             # xdot = Ax + Bu
             xdot = np.dot(sys.A, x)
+            xdot += np.dot(sys.B, u)
 
             # Forwards Euler
             x = x + self.timestep * xdot

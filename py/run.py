@@ -8,6 +8,7 @@ import numpy as np
 
 from linsystem import LinSystem
 from simulator import Simulator
+from controller import PIDController
 
 # Create the system
 sys = LinSystem(2, 1, 1)
@@ -22,6 +23,12 @@ sys.B[1, 0] = -1
 sys.C[0, 0] = 1
 sys.C[0, 1] = 0
 
+# Now a simple controller
+pid = PIDController()
+pid.set_kp(0.1)
+# Target state is [0,0]
+pid.set_target(np.matrix(0))
+
 # Make a simulator and set parms
 sim = Simulator()
 sim.timestep = 0.01
@@ -31,7 +38,7 @@ sim.endtime = 10
 x0 = np.matrix([[-1], [0]])
 
 # Go for it
-x = sim.simulate(sys, x0)
+x = sim.simulate(sys, x0, pid)
 
 # Results
 print "Final state is [%.5f, %.5f]" % (x[0], x[1])
