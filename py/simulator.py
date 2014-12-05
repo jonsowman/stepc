@@ -12,10 +12,24 @@ class Simulator:
     endtime = 0
 
     def simulate(self, sys, x0, controller):
+        """
+        Given a system, an initial system state and a controller, simulate the
+        system and return the final system state.
+
+        Examples:
+        Simulator::simulate(sys, x0, pidcontroller)
+        """
+
         # Check that parameters are OK
-        if(self.timestep == 0 or self.endtime == 0):
-            print "Simulation timestep or end time are wrong"
-            return
+        if(self.timestep == 0):
+            raise ValueError("Simulation timestep has not been set")
+
+        if(self.endtime == 0):
+            raise ValueError("Simulator end time has not been set")
+
+        if(self.timestep > self.endtime):
+            raise ValueError("Simulator end time must be larger than \
+                            the timestep")
 
         # Let the state vector be the initial state
         x = x0
