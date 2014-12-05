@@ -34,3 +34,6 @@ stepc
 
 # venv
 py/venv
+
+# Python
+*.pyc
