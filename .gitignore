@@ -31,3 +31,6 @@ stepc
 # Damn you vim
 *.swp
 *.swo
+
+# venv
+py/venv
