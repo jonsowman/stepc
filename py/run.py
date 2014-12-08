@@ -43,7 +43,8 @@ sim.set_endtime(10)
 x0 = np.matrix([[-1], [0]])
 
 # Go for it
-x = sim.simulate(sys, x0, pid)
+t_all, x_all, u_all = sim.simulate(sys, x0, pid)
+x = x_all[:, -1]
 
 # Results
 print "Final state is [%.6f, %.5f]" % (x[0], x[1])

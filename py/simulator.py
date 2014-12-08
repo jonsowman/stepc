@@ -34,6 +34,11 @@ class Simulator:
         # Let the state vector be the initial state
         x = x0
 
+        # Store the system state and inputs
+        t_store = np.empty(0)
+        x_store = np.empty([sys.order, 0])
+        u_store = np.empty([sys.numinputs, 0])
+
         # Step through time
         i = 0
         while(i < self.__endtime):
@@ -53,7 +58,12 @@ class Simulator:
             # Increment timestep
             i += self.__timestep
 
-        return x
+            # Store the values
+            t_store = np.hstack((t_store, i))
+            x_store = np.hstack((x_store, x))
+            u_store = np.hstack((u_store, u))
+
+        return (t_store, x_store, u_store)
 
     def set_timestep(self, timestep):
         self.__timestep = timestep
