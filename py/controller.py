@@ -7,6 +7,7 @@
 import numpy as np
 
 from linsystem import LinSystem
+from pprint import pprint
 
 
 class Controller:
@@ -61,3 +62,102 @@ class PIDController(Controller):
 
     def set_target(self, target):
         self.target = target
+
+class LinearMPCController(Controller):
+    def __init__(self, sys):
+        self.P = 0
+        self.Q = 0
+        self.R = 0
+        self.__sys = sys
+        self.__Hp = 0
+
+        self.__F = 0
+        self.__G = 0
+
+    def set_prediction_horizon(self, Hp):
+        self.__Hp = Hp
+
+    def generate_matrices(self):
+        """
+        Use a linear MPC technique along with the weights P, Q and R
+        to construct and solve a linear MPC problem to give the
+        required control move.
+        """
+
+        # Assert some things before we break maths
+        if not self.P or not self.Q or not self.R:
+            raise AssertionError("MPC Matrices have not been set")
+
+        if not self.__sys:
+            raise AssertionError("A model has not been attached to \
+                                the MPC controller")
+
+        if not self.__Hp:
+            raise AssertionError("A prediction horizon has not been set")
+
+        # Q & P diagonal with number of elements = number of states
+        Q = self.Q * np.eye(self.__sys.order)
+        P = self.P * np.eye(self.__sys.order)
+        # Same for R
+        R = self.R * np.eye(self.__sys.numinputs)
+
+        # Qbar = diag(Q, Q, Q, ..., P)
+        Qbar = np.empty([self.__Hp * self.__sys.order, self.__Hp *
+            self.__sys.order])
+        pprint(Qbar)
+        for idx in range(self.__Hp):
+            start = idx * self.__sys.order
+            end = start + self.__sys.order
+            print "start is %d and end is %d" % (start, end)
+            Qbar[start:end, start:end] = Q
+
+        # Add P to the final diagnonal element of Qbar
+        Qbar[-self.__Hp:1, -self.__Hp:1] = self.P
+
+        # Rbar = diag(R, R, ..., R)
+        Rbar = np.empty([self.__Hp * self.__sys.numinputs, self.__Hp *
+            self.__sys.numinputs])
+        for idx in range(self.__Hp):
+            start = idx * self.__Hp
+            end = start + self.__sys.numinputs
+            Rbar[start:end, start:end] = R
+
+        # Abar = [A A^2 A^3 ... ]
+        Abar = np.empty([self.__sys.order * self.__Hp, self.__sys.order])
+        for idx in range(self.__Hp):
+            start = idx * self.__sys.order
+            end = start + self.__sys.order
+            Abar[start:end, 0:self.__sys.order] \
+                = np.linalg.matrix_power(self.__sys.A, idx)
+
+        # Bbar = [A, 0; AB, A] for example (Hp=2)
+        Bbar = np.zeros([self.__sys.order * self.__Hp, 
+                        self.__sys.numinputs* self.__Hp])
+
+        block_row = 0
+        block_col = 0
+        while(True):
+
+            block_row += self.__sys.order
+            block_col += self.__sys.numinputs
+
+            if(block_row == self.__Hp or block_col == self.__Hp):
+                break
+
+        for row_idx in range(self.__Hp):
+            for col_idx in range(self.__sys.numinputs):
+                if row_idx >= col_idx:
+                    start = idx * self.__sys.order
+                    end = start + self.__sys.order
+                    Bbar[start:end, start:end] \
+                        = np.linalg.matrix_power(self.__sys.A, 
+                                row_idx - col_idx).dot(self.__sys.B)
+
+
+        # F = 2 B.T Qbar A
+        self.__F = 2 * Bbar.T.dot(Qbar).dot(Abar)
+
+        # G = 2(Rbar + B.T Qbar B)
+        self.__G = Bbar.T.dot(Qbar).dot(Bbar)
+        self.__G = Rbar + self.__G
+        self.__G = self.__G * 2
