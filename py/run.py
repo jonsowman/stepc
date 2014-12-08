@@ -32,7 +32,7 @@ sys.C[0, 1] = 0
 pid = PIDController()
 pid.set_kp(0.1)
 # Target state is [0,0]
-pid.set_target(np.matrix(0))
+pid.set_target(np.array(0))
 
 # Make a simulator and set parms
 sim = Simulator()
@@ -40,7 +40,7 @@ sim.set_timestep(0.001)
 sim.set_endtime(10)
 
 # Initial condition
-x0 = np.matrix([[-1], [0]])
+x0 = np.array([[-1], [0]])
 
 # Go for it
 t_all, x_all, u_all = sim.simulate(sys, x0, pid)
