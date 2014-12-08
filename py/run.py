@@ -7,10 +7,10 @@
 import numpy as np
 import subprocess
 
-from linsystem import LinSystem
-from simulator import Simulator
-from controller import PIDController
-from solver import ForwardsEulerSolver
+from stepc.linsystem import LinSystem
+from stepc.simulator import Simulator
+from stepc.controller import PIDController
+from stepc.solver import ForwardsEulerSolver
 
 git_version = subprocess.check_output(["git", "describe", "--dirty",
                                       "--always"])

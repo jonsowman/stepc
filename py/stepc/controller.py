@@ -112,8 +112,6 @@ class LinearMPCController(Controller):
         # Add P to the final diagnonal element of Qbar
         Qbar[-self.__Hp:-1, -self.__Hp:-1] = self.P
 
-        pprint(Qbar)
-
         # Rbar = diag(R, R, ..., R)
         Rbar = np.zeros([self.__Hp * self.__sys.numinputs, self.__Hp *
             self.__sys.numinputs])
