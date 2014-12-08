@@ -59,9 +59,9 @@ class Simulator:
             i += self.__timestep
 
             # Store the values
-            t_store = np.hstack((t_store, i))
-            x_store = np.hstack((x_store, x))
-            u_store = np.hstack((u_store, u))
+            t_store = np.append(t_store, i)
+            x_store = np.append(x_store, x, 1)
+            u_store = np.append(u_store, u, 1)
 
         return (t_store, x_store, u_store)
 

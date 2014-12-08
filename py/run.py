@@ -17,27 +17,36 @@ print "+++++ STEPC (Version %s) +++++" % git_version.strip()
 
 # Create the system
 sys = LinSystem(2, 1, 1)
+
+# Mass on a spring
+# Mass
+m = .5
+# Damping const
+b = .2
+# Spring const
+k = 1
+
 sys.A[0, 0] = 0
 sys.A[0, 1] = 1
-sys.A[1, 0] = -1
-sys.A[1, 1] = 0
+sys.A[1, 0] = -k/m
+sys.A[1, 1] = -b/m
 
 sys.B[0, 0] = 0
-sys.B[1, 0] = -1
+sys.B[1, 0] = 1/m
 
 sys.C[0, 0] = 1
 sys.C[0, 1] = 0
 
 # Now a simple controller
 pid = PIDController()
-pid.set_kp(0.1)
+pid.set_kp(2)
 # Target state is [0,0]
-pid.set_target(np.array(0))
+pid.set_target(np.array([0]))
 
 # Make a simulator and set parms
 sim = Simulator()
 sim.set_timestep(0.001)
-sim.set_endtime(10)
+sim.set_endtime(30)
 
 # Initial condition
 x0 = np.array([[-1], [0]])
