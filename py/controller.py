@@ -102,7 +102,7 @@ class LinearMPCController(Controller):
         R = self.R * np.eye(self.__sys.numinputs)
 
         # Qbar = diag(Q, Q, Q, ..., P)
-        Qbar = np.empty([self.__Hp * self.__sys.order, self.__Hp *
+        Qbar = np.zeros([self.__Hp * self.__sys.order, self.__Hp *
             self.__sys.order])
         for idx in range(self.__Hp):
             start = idx * self.__sys.order
@@ -110,10 +110,12 @@ class LinearMPCController(Controller):
             Qbar[start:end, start:end] = Q
 
         # Add P to the final diagnonal element of Qbar
-        Qbar[-self.__Hp:1, -self.__Hp:1] = self.P
+        Qbar[-self.__Hp:-1, -self.__Hp:-1] = self.P
+
+        pprint(Qbar)
 
         # Rbar = diag(R, R, ..., R)
-        Rbar = np.empty([self.__Hp * self.__sys.numinputs, self.__Hp *
+        Rbar = np.zeros([self.__Hp * self.__sys.numinputs, self.__Hp *
             self.__sys.numinputs])
         for idx in range(self.__Hp):
             start = idx * self.__Hp
@@ -121,7 +123,7 @@ class LinearMPCController(Controller):
             Rbar[start:end, start:end] = R
 
         # Abar = [A A^2 A^3 ... ]
-        Abar = np.empty([self.__sys.order * self.__Hp, self.__sys.order])
+        Abar = np.zeros([self.__sys.order * self.__Hp, self.__sys.order])
         for idx in range(self.__Hp):
             start = idx * self.__sys.order
             end = start + self.__sys.order
