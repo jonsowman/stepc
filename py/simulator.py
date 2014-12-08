@@ -10,6 +10,7 @@ import numpy as np
 class Simulator:
     __timestep = 0
     __endtime = 0
+    __solver = False
 
     def simulate(self, sys, x0, controller):
         """
@@ -19,6 +20,10 @@ class Simulator:
         Examples:
         Simulator::simulate(sys, x0, pidcontroller)
         """
+
+        # Did someone set a solver
+        if not self.__solver:
+            raise AssertionError("No solver set in Simulator!")
 
         # Check that parameters are OK
         if(self.__timestep == 0):
@@ -52,8 +57,8 @@ class Simulator:
             xdot = np.dot(sys.A, x)
             xdot += np.dot(sys.B, u)
 
-            # Forwards Euler
-            x = x + self.__timestep * xdot
+            # Call whatever solver we're using
+            x = self.__solver.step(x, xdot, self.__timestep)
 
             # Increment timestep
             i += self.__timestep
@@ -70,3 +75,6 @@ class Simulator:
 
     def set_endtime(self, endtime):
         self.__endtime = endtime
+
+    def set_solver(self, solver):
+        self.__solver = solver

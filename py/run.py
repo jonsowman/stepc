@@ -10,6 +10,7 @@ import subprocess
 from linsystem import LinSystem
 from simulator import Simulator
 from controller import PIDController
+from solver import ForwardsEulerSolver
 
 git_version = subprocess.check_output(["git", "describe", "--dirty",
                                       "--always"])
@@ -44,7 +45,9 @@ pid.set_kp(2)
 pid.set_target(np.array([0]))
 
 # Make a simulator and set parms
+solver = ForwardsEulerSolver()
 sim = Simulator()
+sim.set_solver(solver)
 sim.set_timestep(0.001)
 sim.set_endtime(30)
 
