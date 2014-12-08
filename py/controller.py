@@ -104,11 +104,9 @@ class LinearMPCController(Controller):
         # Qbar = diag(Q, Q, Q, ..., P)
         Qbar = np.empty([self.__Hp * self.__sys.order, self.__Hp *
             self.__sys.order])
-        pprint(Qbar)
         for idx in range(self.__Hp):
             start = idx * self.__sys.order
             end = start + self.__sys.order
-            print "start is %d and end is %d" % (start, end)
             Qbar[start:end, start:end] = Q
 
         # Add P to the final diagnonal element of Qbar
@@ -134,25 +132,23 @@ class LinearMPCController(Controller):
         Bbar = np.zeros([self.__sys.order * self.__Hp, 
                         self.__sys.numinputs* self.__Hp])
 
-        block_row = 0
-        block_col = 0
-        while(True):
+        # log_ = "logical", i.e. the submatrix blocks
+        # phy_ = "physical", i.e. the way the matrix is laid
+        #         out in memory
+        phy_row = phy_col = log_row = log_col = 0
+        for log_row in range(self.__Hp):
+            for log_col in range(self.__Hp):
+                phy_row += self.__sys.order
+                phy_col += self.__sys.numinputs
 
-            block_row += self.__sys.order
-            block_col += self.__sys.numinputs
-
-            if(block_row == self.__Hp or block_col == self.__Hp):
-                break
-
-        for row_idx in range(self.__Hp):
-            for col_idx in range(self.__sys.numinputs):
-                if row_idx >= col_idx:
-                    start = idx * self.__sys.order
-                    end = start + self.__sys.order
-                    Bbar[start:end, start:end] \
+                if(log_row >= log_col):
+                    phy_row_start = log_row * self.__sys.order
+                    phy_row_end = phy_row_start + self.__sys.order
+                    phy_col_start = log_col * self.__sys.numinputs
+                    phy_col_end = phy_col_start + self.__sys.numinputs
+                    Bbar[phy_row_start:phy_row_end, phy_col_start:phy_col_end] \
                         = np.linalg.matrix_power(self.__sys.A, 
-                                row_idx - col_idx).dot(self.__sys.B)
-
+                                log_row - log_col).dot(self.__sys.B)
 
         # F = 2 B.T Qbar A
         self.__F = 2 * Bbar.T.dot(Qbar).dot(Abar)
