@@ -63,6 +63,7 @@ class PIDController(Controller):
     def set_target(self, target):
         self.target = target
 
+
 class LinearMPCController(Controller):
     def __init__(self, sys):
         self.P = 0
@@ -103,7 +104,7 @@ class LinearMPCController(Controller):
 
         # Qbar = diag(Q, Q, Q, ..., P)
         Qbar = np.zeros([self.__Hp * self.__sys.order, self.__Hp *
-            self.__sys.order])
+                        self.__sys.order])
         for idx in range(self.__Hp):
             start = idx * self.__sys.order
             end = start + self.__sys.order
@@ -114,7 +115,7 @@ class LinearMPCController(Controller):
 
         # Rbar = diag(R, R, ..., R)
         Rbar = np.zeros([self.__Hp * self.__sys.numinputs, self.__Hp *
-            self.__sys.numinputs])
+                        self.__sys.numinputs])
         for idx in range(self.__Hp):
             start = idx * self.__Hp
             end = start + self.__sys.numinputs
@@ -129,8 +130,8 @@ class LinearMPCController(Controller):
                 = np.linalg.matrix_power(self.__sys.A, idx)
 
         # Bbar = [A, 0; AB, A] for example (Hp=2)
-        Bbar = np.zeros([self.__sys.order * self.__Hp, 
-                        self.__sys.numinputs* self.__Hp])
+        Bbar = np.zeros([self.__sys.order * self.__Hp,
+                        self.__sys.numinputs * self.__Hp])
 
         # log_ = "logical", i.e. the submatrix blocks
         # phy_ = "physical", i.e. the way the matrix is laid
@@ -147,7 +148,7 @@ class LinearMPCController(Controller):
                     phy_col_start = log_col * self.__sys.numinputs
                     phy_col_end = phy_col_start + self.__sys.numinputs
                     Bbar[phy_row_start:phy_row_end, phy_col_start:phy_col_end] \
-                        = np.linalg.matrix_power(self.__sys.A, 
+                        = np.linalg.matrix_power(self.__sys.A,
                                 log_row - log_col).dot(self.__sys.B)
 
         # F = 2 B.T Qbar A

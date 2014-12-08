@@ -22,6 +22,7 @@ def test_forwards_euler_single():
 
     assert np.allclose(x, np.array([[-1], [2], [2]]))
 
+
 def test_forwads_euler_multiple():
     """
     Create an initial condition and then use forwards Euler

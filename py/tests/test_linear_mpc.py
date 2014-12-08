@@ -4,7 +4,7 @@
 #
 # Jon Sowman 2014 <j.sowman@soton.ac.uk>
 
-from ..stepc.controller import LinearMPCController 
+from ..stepc.controller import LinearMPCController
 from ..stepc.linsystem import LinSystem
 
 import numpy as np
@@ -19,7 +19,7 @@ class TestLinearMPC:
         to a toy problem.
         """
 
-        self.__sys = LinSystem(2,1,1)
+        self.__sys = LinSystem(2, 1, 1)
         self.__sys.A = np.eye(2)
         self.__sys.B = np.array([[1], [2]])
 
