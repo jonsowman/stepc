@@ -10,7 +10,7 @@ from linsystem import LinSystem
 from pprint import pprint
 
 
-class Controller:
+class Controller(object):
     def __init__(self):
         self.sys = 0
 

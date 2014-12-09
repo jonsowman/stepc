@@ -7,7 +7,7 @@
 import numpy as np
 
 
-class Simulator:
+class Simulator(object):
     __timestep = 0
     __endtime = 0
     __solver = False

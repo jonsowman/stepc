@@ -10,7 +10,7 @@ from ..stepc.linsystem import LinSystem
 import numpy as np
 
 
-class TestLinearMPC:
+class TestLinearMPC(object):
 
     def setup(self):
         """
@@ -23,9 +23,11 @@ class TestLinearMPC:
         # Test system is from 12mr (mass/spring)
         self.__sys.A = np.array([[0.1, 1], [1, -0.1]])
         self.__sys.B = np.array([[0], [0.1]])
+    setup.__test__ = False
 
     def teardown(self):
         pass
+    teardown.__test__ = False
 
     def test_generate_F(self):
         mpc = LinearMPCController(self.__sys)
