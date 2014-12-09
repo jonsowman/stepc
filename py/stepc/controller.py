@@ -5,6 +5,7 @@
 # Jon Sowman 2014 <j.sowman@soton.ac.uk>
 
 import numpy as np
+import cvxopt
 
 from linsystem import LinSystem
 from pprint import pprint
@@ -159,3 +160,24 @@ class LinearMPCController(Controller):
         self.__G = Bbar.T.dot(Qbar).dot(Bbar)
         self.__G = Rbar + self.__G
         self.__G = self.__G * 2
+
+    def controlmove(self, x0):
+        """
+        Use Linear MPC to calculate a control move, returning the first input.
+
+        This method uses the cvxopt quadratic programme (QP) solver (which uses
+        a primal-dual interior point method) to find the optimal system input
+        given the internal system model (self.__sys). The optimisation finds an
+        input vector over the control horizon (self.__Hu) but only the first
+        input is returned and applied to the plant.
+        """
+
+        # Need to convert to 'cvxopt' matrices instead of np arrays
+        results = cvxopt.solvers.qp(cvxopt.matrix(self.__G),
+                cvxopt.matrix(self.__F.dot(x0)))
+
+        # Extract result and turn it back to an np array
+        uvect = np.array(results['x'])
+
+        # Return u0, the first control input
+        return uvect[0]
