@@ -120,14 +120,15 @@ class LinearMPCController(Controller):
             start = idx * self.__Hp
             end = start + self.__sys.numinputs
             Rbar[start:end, start:end] = R
-
+        
         # Abar = [A A^2 A^3 ... ]
         Abar = np.zeros([self.__sys.order * self.__Hp, self.__sys.order])
         for idx in range(self.__Hp):
             start = idx * self.__sys.order
             end = start + self.__sys.order
+            # Each block is A ^ (index+1) (since index starts at 0)
             Abar[start:end, 0:self.__sys.order] \
-                = np.linalg.matrix_power(self.__sys.A, idx)
+                = np.linalg.matrix_power(self.__sys.A, idx+1)
 
         # Bbar = [A, 0; AB, A] for example (Hp=2)
         Bbar = np.zeros([self.__sys.order * self.__Hp,

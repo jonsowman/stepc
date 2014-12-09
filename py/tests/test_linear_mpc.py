@@ -20,8 +20,12 @@ class TestLinearMPC:
         """
 
         self.__sys = LinSystem(2, 1, 1)
-        self.__sys.A = np.eye(2)
-        self.__sys.B = np.array([[1], [2]])
+        # Test system is from 12mr (mass/spring)
+        self.__sys.A = np.array([[0.1, 1], [1, -0.1]])
+        self.__sys.B = np.array([[0], [0.1]])
+
+    def teardown(self):
+        pass
 
     def test_generate_F(self):
         mpc = LinearMPCController(self.__sys)
@@ -29,6 +33,16 @@ class TestLinearMPC:
         mpc.set_prediction_horizon(1)
         mpc.generate_matrices()
 
-        expected = np.array([[2, 4]])
+        expected_F = np.array([[0.2, -0.02]])
 
-        assert np.array_equal(expected, mpc._LinearMPCController__F)
+        assert np.allclose(expected_F, mpc._LinearMPCController__F)
+
+    def test_generate_G(self):
+        mpc = LinearMPCController(self.__sys)
+        mpc.P = mpc.Q = mpc.R = 1
+        mpc.set_prediction_horizon(1)
+        mpc.generate_matrices()
+
+        expected_G = np.array([[2.02]])
+
+        assert np.allclose(expected_G, mpc._LinearMPCController__G)
