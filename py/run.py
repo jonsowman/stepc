@@ -49,7 +49,7 @@ solver = ForwardsEulerSolver()
 sim = Simulator()
 sim.set_solver(solver)
 sim.set_timestep(0.001)
-sim.set_endtime(30)
+sim.set_endtime(10)
 
 # Initial condition
 x0 = np.array([[-1], [0]])
