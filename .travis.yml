@@ -1,8 +1,10 @@
 language: python
 python: 
     - "2.7"
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq gfortran libopenblas-dev liblapack-dev
 install:
-    - sudo apt-get install gfortran libopenblas-dev liblapack-dev
     - pip install -r py/requirements.txt
 script:
     nosetests
