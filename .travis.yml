@@ -13,7 +13,7 @@ before_install:
   - conda update --yes conda
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose dateutil pandas statsmodels
-  - pip install cvxopt
+  - conda install --yes -c https://conda.binstar.org/mutirri cvxopt
  
 # Run test
 script:
