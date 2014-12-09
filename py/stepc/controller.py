@@ -180,4 +180,4 @@ class LinearMPCController(Controller):
         uvect = np.array(results['x'])
 
         # Return u0, the first control input
-        return uvect[0]
+        return np.array([uvect[0]])
