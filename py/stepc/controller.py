@@ -172,9 +172,15 @@ class LinearMPCController(Controller):
         input is returned and applied to the plant.
         """
 
+        # Let Fx be F dot x0
+        Fx = self.__F.dot(x0)
+        
         # Need to convert to 'cvxopt' matrices instead of np arrays
-        results = cvxopt.solvers.qp(cvxopt.matrix(self.__G),
-                cvxopt.matrix(self.__F.dot(x0)))
+        cvx_G = cvxopt.matrix(self.__G)
+        cvx_Fx = cvxopt.matrix(Fx)
+
+        # Run the optimiser
+        results = cvxopt.solvers.qp(cvx_G, cvx_Fx)
 
         # Extract result and turn it back to an np array
         uvect = np.array(results['x'])
