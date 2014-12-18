@@ -29,22 +29,26 @@ class TestLinearMPC(object):
         pass
     teardown.__test__ = False
 
-    def test_generate_F(self):
-        mpc = LinearMPCController(self.__sys)
-        mpc.P = mpc.Q = mpc.R = 1
-        mpc.set_prediction_horizon(1)
-        mpc.generate_matrices()
-
-        expected_F = np.array([[0.2, -0.02]])
-
-        assert np.allclose(expected_F, mpc._LinearMPCController__F)
-
     def test_generate_G(self):
         mpc = LinearMPCController(self.__sys)
         mpc.P = mpc.Q = mpc.R = 1
         mpc.set_prediction_horizon(1)
+        mpc.set_control_horizon(1)
+        mpc.set_target(np.array([[0], [0]]))
         mpc.generate_matrices()
 
-        expected_G = np.array([[2.02]])
+        expected_G = np.array([[0, 0.2]])
 
         assert np.allclose(expected_G, mpc._LinearMPCController__G)
+
+    def test_generate_H(self):
+        mpc = LinearMPCController(self.__sys)
+        mpc.P = mpc.Q = mpc.R = 1
+        mpc.set_prediction_horizon(1)
+        mpc.set_control_horizon(1)
+        mpc.set_target(np.array([[0], [0]]))
+        mpc.generate_matrices()
+
+        expected_H = np.array([[2.02]])
+
+        assert np.allclose(expected_H, mpc._LinearMPCController__H)
