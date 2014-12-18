@@ -141,7 +141,7 @@ class LinearMPCController(Controller):
             start = idx * self.__sys.numinputs
             end = start + self.__sys.numinputs
             Rbar[start:end, start:end] = R
-        
+
         # Psi = [A; A^2; A^3 ... ] with dimension mHp x n
         psi = np.zeros([self.__sys.order * self.__Hp, self.__sys.order])
         for idx in range(self.__Hp):
@@ -169,7 +169,7 @@ class LinearMPCController(Controller):
             colstart = idx * self.__sys.numinputs
             colend = colstart + self.__sys.numinputs
             phi[rowstart:self.__sys.order * self.__Hp, colstart:colend] \
-                    = gamma[0:rowend, :]
+                = gamma[0:rowend, :]
 
         # tau = [target; target; ... ] for all of Hp
         tau = self.__target.copy()
@@ -208,7 +208,7 @@ class LinearMPCController(Controller):
 
         # Let Gx be G.dot(error)
         Geps = self.__G.dot(error)
-        
+
         # Need to convert to 'cvxopt' matrices instead of np arrays
         cvx_H = cvxopt.matrix(self.__H)
         cvx_Geps = cvxopt.matrix(Geps)

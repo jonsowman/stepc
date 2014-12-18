@@ -6,9 +6,11 @@
 
 import numpy as np
 
+
 class Solver(object):
     def step(self):
         return 0
+
 
 class ForwardsEulerSolver(Solver):
     def step(self, x0, xdot, Ts):

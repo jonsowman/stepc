@@ -6,6 +6,7 @@
 
 import numpy as np
 
+
 class LinSystem(object):
     def __init__(self, order, numinputs, numoutputs):
         self.A = np.empty([order, order])
