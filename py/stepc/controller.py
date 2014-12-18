@@ -118,7 +118,7 @@ class LinearMPCController(Controller):
         Rbar = np.zeros([self.__Hp * self.__sys.numinputs, self.__Hp *
                         self.__sys.numinputs])
         for idx in range(self.__Hp):
-            start = idx * self.__Hp
+            start = idx * self.__sys.numinputs
             end = start + self.__sys.numinputs
             Rbar[start:end, start:end] = R
         
@@ -153,7 +153,9 @@ class LinearMPCController(Controller):
                         = np.linalg.matrix_power(self.__sys.A,
                                 log_row - log_col).dot(self.__sys.B)
 
-        # F = 2 B.T Qbar A
+        pprint(Rbar)
+
+        # F = 3 B.T Qbar A
         self.__F = 2 * Bbar.T.dot(Qbar).dot(Abar)
 
         # G = 2(Rbar + B.T Qbar B)
