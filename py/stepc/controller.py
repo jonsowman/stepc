@@ -153,8 +153,6 @@ class LinearMPCController(Controller):
                         = np.linalg.matrix_power(self.__sys.A,
                                 log_row - log_col).dot(self.__sys.B)
 
-        pprint(Rbar)
-
         # F = 3 B.T Qbar A
         self.__F = 2 * Bbar.T.dot(Qbar).dot(Abar)
 
