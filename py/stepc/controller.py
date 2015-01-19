@@ -222,20 +222,20 @@ class LinearMPCController(Controller):
         z = np.zeros([self.__sys.numinputs * 2, self.__sys.numinputs])
 
         # Start with an empty F
-        F = np.zeros([self.__sys.numinputs * self.__Hu * 2, 0])
+        self.F = np.zeros([self.__sys.numinputs * self.__Hu * 2, 0])
         # Create the full F matrix recursively
         for col_idx in range(self.__Hu):
             col_top = np.tile(z, (col_idx, 1))
             col_bot = np.tile(block, (self.__Hu - col_idx, 1))
             col = np.vstack((col_top, col_bot))
-            F = np.hstack((F, col))
+            self.F = np.hstack((self.F, col))
 
         # Extract F1 since we need it for the RHS (3.37 in Maciejowski)
-        F1 = F[:, self.__sys.numinputs]
+        self.F1 = self.F[:, 0:self.__sys.numinputs]
 
         # Now generate 'f' (little-f)
         f_single = np.vstack((uhigh.T, ulow.T))
-        f = np.tile(f_single, (self.__Hu, 1))
+        self.f = np.tile(f_single, (self.__Hu, 1))
 
         # STATE CONSTRAINTS
         # TODO
@@ -259,12 +259,19 @@ class LinearMPCController(Controller):
         # Let Gx be G.dot(error)
         Geps = self.__G.dot(error)
 
+        # Sort the constraints
+        # Input constraints
+        u_rhs = -self.F1.dot(self.u_last) - self.f
+
         # Need to convert to 'cvxopt' matrices instead of np arrays
         cvx_H = cvxopt.matrix(self.__H)
         cvx_Geps = cvxopt.matrix(Geps)
+        cvx_F = cvxopt.matrix(self.F)
+        cvx_u_rhs = cvxopt.matrix(u_rhs)
 
         # Run the optimiser (note the negative here, see Maciejowski eq. 3.10)
-        results = cvxopt.solvers.qp(cvx_H, -cvx_Geps)
+        cvxopt.solvers.options['show_progress'] = False
+        results = cvxopt.solvers.qp(cvx_H, -cvx_Geps, cvx_F, cvx_u_rhs)
 
         # Extract result and turn it back to an np array
         uvect = np.array(results['x'])
