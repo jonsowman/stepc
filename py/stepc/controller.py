@@ -190,6 +190,38 @@ class LinearMPCController(Controller):
         self.__H = Rbar + self.__H
         self.__H = self.__H * 2
 
+    def generate_constraints(self, ulow, uhigh):
+        """
+        Generate the linear inequality constraint matrices Ax < b
+        for the quadratic programming problem. Constraints are to be phrased as
+        constraints on delta-u (i.e. changes in the control inputs).
+
+        This formulation is detailed in Maciejowski pp. 81-83.
+
+        ulow is a vector specifying the lower box constraint for each control
+        input u (i.e. this vector has length equal to the number of controlled
+        inputs of the plant). A similar situation applies for uhigh.
+        """
+
+        # Start with constraints on u. I matrices in A are m x m (m = number of
+        # controlled inputs)
+        I = np.eye(self.__sys.numinputs)
+        block = np.vstack((I, -I))
+
+        # Create a zero matrix of the same size as 'block'
+        z = np.zeros([self.__sys.numinputs * 2, self.__sys.numinputs])
+
+        # Start with an empty F
+        F = np.zeros([self.__sys.numinputs * self.__Hu * 2, 0])
+        # Create the full F matrix recursively
+        for col_idx in range(self.__Hu):
+            col_top = np.tile(z, (col_idx, 1))
+            col_bot = np.tile(block, (self.__Hu - col_idx, 1))
+            col = np.vstack((col_top, col_bot))
+            F = np.hstack((F, col))
+
+        pprint(F)
+
     def controlmove(self, x0):
         """
         Use Linear MPC to calculate a control move, returning the first input.
