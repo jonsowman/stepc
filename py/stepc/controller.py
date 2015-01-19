@@ -203,6 +203,16 @@ class LinearMPCController(Controller):
         inputs of the plant). A similar situation applies for uhigh.
         """
 
+        # INPUT CONSTRAINTS
+
+        # Verify that the constraint vectors given are of the right dimension
+        assert (np.size(ulow) == self.__sys.numinputs), "Size of ulow \
+                constraint vector (%d) and number of system inputs \
+                (%d) must be the same" % (np.size(ulow), self.__sys.numinputs)
+        assert (np.size(uhigh) == self.__sys.numinputs), "Size of uhigh \
+                constraint vector (%d) and number of system inputs \
+                (%d) must be the same" % (np.size(uhigh), self.__sys.numinputs)
+
         # Start with constraints on u. I matrices in A are m x m (m = number of
         # controlled inputs)
         I = np.eye(self.__sys.numinputs)
@@ -220,7 +230,15 @@ class LinearMPCController(Controller):
             col = np.vstack((col_top, col_bot))
             F = np.hstack((F, col))
 
-        pprint(F)
+        # Extract F1 since we need it for the RHS (3.37 in Maciejowski)
+        F1 = F[:, self.__sys.numinputs]
+
+        # Now generate 'f' (little-f)
+        f_single = np.vstack((uhigh.T, ulow.T))
+        f = np.tile(f_single, (self.__Hu, 1))
+
+        # STATE CONSTRAINTS
+        # TODO
 
     def controlmove(self, x0):
         """
