@@ -190,7 +190,7 @@ class LinearMPCController(Controller):
         self.__H = Rbar + self.__H
         self.__H = self.__H * 2
 
-    def generate_constraints(self, ulow, uhigh):
+    def generate_constraints(self, ulow, uhigh, dulow, duhigh):
         """
         Generate the linear inequality constraint matrices Ax < b
         for the quadratic programming problem. Constraints are to be phrased as
@@ -201,18 +201,28 @@ class LinearMPCController(Controller):
         ulow is a vector specifying the lower box constraint for each control
         input u (i.e. this vector has length equal to the number of controlled
         inputs of the plant). A similar situation applies for uhigh.
+
+        dulow and duhigh are the same thing but for changes in the input that
+        are permitted between one time step and the next.
         """
 
-        # INPUT CONSTRAINTS
-
         # Verify that the constraint vectors given are of the right dimension
-        assert (np.size(ulow) == self.__sys.numinputs), "Size of ulow \
+        assert (np.size(dulow) == self.__sys.numinputs), "Size of dulow \
+                 constraint vector (%d) and number of system inputs \
+                 (%d) must be the same" % (np.size(dulow), self.__sys.numinputs)
+        assert (np.size(duhigh) == self.__sys.numinputs), "Size of duhigh \
                 constraint vector (%d) and number of system inputs \
-                (%d) must be the same" % (np.size(ulow), self.__sys.numinputs)
+                (%d) must be the same" % (np.size(duhigh), self.__sys.numinputs)
+        assert (np.size(ulow) == self.__sys.numinputs), "Size of ulow \
+               constraint vector (%d) and number of system inputs \
+               (%d) must be the same" % (np.size(ulow), self.__sys.numinputs)
         assert (np.size(uhigh) == self.__sys.numinputs), "Size of uhigh \
                 constraint vector (%d) and number of system inputs \
                 (%d) must be the same" % (np.size(uhigh), self.__sys.numinputs)
 
+        # These matrices are used during the generation of more than one set of
+        # constraint matrices
+        
         # Start with constraints on u. I matrices in A are m x m (m = number of
         # controlled inputs)
         I = np.eye(self.__sys.numinputs)
@@ -221,6 +231,21 @@ class LinearMPCController(Controller):
         # Create a zero matrix of the same size as 'block'
         z = np.zeros([self.__sys.numinputs * 2, self.__sys.numinputs])
 
+        # DELTA-INPUT CONSTRAINTS
+        # Start with an empty E
+        self.W = np.zeros([self.__sys.numinputs * self.__Hu * 2, 0])
+        # Create the full E matrix recursively
+        for col_idx in range(self.__Hu):
+            col_top = np.tile(z, (col_idx, 1))
+            col_bot = np.tile(z, (self.__Hu - col_idx - 1, 1))
+            col = np.vstack((col_top, block, col_bot))
+            self.W = np.hstack((self.W, col))
+
+        # Generate w (little-w) which is the RHS of the delta-u inequality
+        w_single = np.vstack((duhigh.T, -dulow.T))
+        self.w = np.tile(w_single, (self.__Hu, 1))
+
+        # INPUT CONSTRAINTS
         # Start with an empty F
         self.F = np.zeros([self.__sys.numinputs * self.__Hu * 2, 0])
         # Create the full F matrix recursively
@@ -236,7 +261,6 @@ class LinearMPCController(Controller):
         # Now generate 'f' (little-f)
         f_single = np.vstack((-uhigh.T, ulow.T))
         self.f = np.tile(f_single, (self.__Hu, 1))
-        pprint(self.f)
 
         # STATE CONSTRAINTS
         # TODO
@@ -264,15 +288,20 @@ class LinearMPCController(Controller):
         # Input constraints
         u_rhs = -self.F1.dot(self.u_last) - self.f
 
+        # Stack the constraints
+        constraints_lhs_stacked = np.vstack((self.F, self.W))
+        constraints_rhs_stacked = np.vstack((u_rhs, self.w))
+
         # Need to convert to 'cvxopt' matrices instead of np arrays
         cvx_H = cvxopt.matrix(self.__H)
         cvx_Geps = cvxopt.matrix(Geps)
-        cvx_F = cvxopt.matrix(self.F)
-        cvx_u_rhs = cvxopt.matrix(u_rhs)
+        cvx_constraints_lhs_stacked = cvxopt.matrix(constraints_lhs_stacked)
+        cvx_constraints_rhs_stacked = cvxopt.matrix(constraints_rhs_stacked)
 
         # Run the optimiser (note the negative here, see Maciejowski eq. 3.10)
         cvxopt.solvers.options['show_progress'] = False
-        results = cvxopt.solvers.qp(cvx_H, -cvx_Geps, cvx_F, cvx_u_rhs)
+        results = cvxopt.solvers.qp(cvx_H, -cvx_Geps,
+                cvx_constraints_lhs_stacked, cvx_constraints_rhs_stacked)
 
         # Extract result and turn it back to an np array
         uvect = np.array(results['x'])
