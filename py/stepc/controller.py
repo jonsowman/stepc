@@ -234,8 +234,9 @@ class LinearMPCController(Controller):
         self.F1 = self.F[:, 0:self.__sys.numinputs]
 
         # Now generate 'f' (little-f)
-        f_single = np.vstack((uhigh.T, ulow.T))
+        f_single = np.vstack((-uhigh.T, ulow.T))
         self.f = np.tile(f_single, (self.__Hu, 1))
+        pprint(self.f)
 
         # STATE CONSTRAINTS
         # TODO
