@@ -206,6 +206,14 @@ class LinearMPCController(Controller):
         are permitted between one time step and the next.
         """
 
+        # Make sure generate_matrices has been run as we rely on some of its
+        # results
+        try:
+            self.__phi
+        except NameError:
+            print "You need to run generate_matrices() before constraints \
+                    can be added"
+
         # Verify that the constraint vectors given are of the right dimension
         assert (np.size(dulow) == self.__sys.numinputs), "Size of dulow \
                  constraint vector (%d) and number of system inputs \
@@ -288,7 +296,6 @@ class LinearMPCController(Controller):
         # (controlled output) inequality
         g_single = np.vstack((-zhigh.T, zlow.T))
         self.g = np.tile(g_single, (self.__Hp, 1))
-        pprint(self.g)
 
     def controlmove(self, x0):
         """
