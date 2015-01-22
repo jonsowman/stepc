@@ -214,28 +214,29 @@ class LinearMPCController(Controller):
                     can be added"
 
         # Check that limits have 2 columns each
-        assert (ulim.shape[1] == 2), "ulim must have exactly 2 columns, \
+        assert (ulim.shape[1] == 4), "ulim must have exactly 4 columns, \
                 has %d" % ulim.shape[1]
-        assert (dulim.shape[1] == 2), "dulim must have exactly 2 columns, \
+        assert (dulim.shape[1] == 4), "dulim must have exactly 4 columns, \
                 has %d" % dulim.shape[1]
-        assert (zlim.shape[1] == 2), "zlim must have exactly 2 columns, \
+        assert (zlim.shape[1] == 4), "zlim must have exactly 4 columns, \
                 has %d" % zlim.shape[1]
 
-        # Extract the upper and lower limits
-        ulow = ulim[:,0]
-        uhigh = ulim[:,1]
-        dulow = dulim[:,0]
-        duhigh = dulim[:,1]
-        zlow = zlim[:,0]
-        zhigh = zlim[:,1]
+        # Extract the upper and lower limits, their weights, and force them to
+        # be 2D row vectors
+        ulow = ulim[:,0].reshape(1, -1)
+        ulow_weight = ulim[:,1].reshape(1, -1)
+        uhigh = ulim[:,2].reshape(1, -1)
+        uhigh_weight = ulim[:,3].reshape(1, -1)
 
-        # Force these vectors to be 2D np arrays (in row vector form)
-        ulow = ulow.reshape(1, -1)
-        uhigh = uhigh.reshape(1, -1)
-        dulow = dulow.reshape(1, -1)
-        duhigh = duhigh.reshape(1, -1)
-        zlow = zlow.reshape(1, -1)
-        zhigh = zhigh.reshape(1, -1)
+        dulow = dulim[:,0].reshape(1, -1)
+        dulow_weight = dulim[:,1].reshape(1, -1)
+        duhigh = dulim[:,2].reshape(1, -1)
+        duhigh_weight = dulim[:,3].reshape(1, -1)
+
+        zlow = zlim[:,0].reshape(1, -1)
+        zlow_weight = zlim[:,1].reshape(1, -1)
+        zhigh = zlim[:,2].reshape(1, -1)
+        zhigh_weight = zlim[:,3].reshape(1, -1)
 
         # Verify that the constraint vectors given are of the right dimension
         assert (np.size(dulow) == self.__sys.numinputs), "Size of dulow \
@@ -319,6 +320,18 @@ class LinearMPCController(Controller):
         # (controlled output) inequality
         g_single = np.vstack((-zhigh.T, zlow.T))
         self.g = np.tile(g_single, (self.__Hp, 1))
+
+        # SOFT CONSTRAINTS
+        # Stack weights in the same order as the constraint coefficients
+        weights = np.vstack((np.tile(duhigh_weight.T, (self.__Hu, 1)),
+                             np.tile(dulow_weight.T, (self.__Hu, 1)),
+                             np.tile(uhigh_weight.T, (self.__Hu, 1)),
+                             np.tile(ulow_weight.T, (self.__Hu, 1)),
+                             np.tile(zhigh_weight.T, (self.__Hp, 1)),
+                             np.tile(zlow_weight.T, (self.__Hp, 1))))
+
+        # Check for zero-weights since they break the QP and should be removed
+        assert weights.all(), "All weights must be positive real numbers"
 
     def controlmove(self, x0):
         """
