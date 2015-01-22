@@ -190,7 +190,7 @@ class LinearMPCController(Controller):
         self.__H = Rbar + self.__H
         self.__H = self.__H * 2
 
-    def generate_constraints(self, ulow, uhigh, dulow, duhigh, zlow, zhigh):
+    def generate_constraints(self, ulim, dulim, zlim):
         """
         Generate the linear inequality constraint matrices Ax < b
         for the quadratic programming problem. Constraints are to be phrased as
@@ -198,12 +198,11 @@ class LinearMPCController(Controller):
 
         This formulation is detailed in Maciejowski pp. 81-83.
 
-        ulow is a vector specifying the lower box constraint for each control
-        input u (i.e. this vector has length equal to the number of controlled
-        inputs of the plant). A similar situation applies for uhigh.
+        ulim contains 2 colums and as many rows as there are plant inputs. The
+        two columns are the lower and upper limits on u respectively. The same
+        applies for dulim (delta-u limits) and zlim (controlled variable
+        limits).
 
-        dulow and duhigh are the same thing but for changes in the input that
-        are permitted between one time step and the next.
         """
 
         # Make sure generate_matrices has been run as we rely on some of its
@@ -213,6 +212,30 @@ class LinearMPCController(Controller):
         except NameError:
             print "You need to run generate_matrices() before constraints \
                     can be added"
+
+        # Check that limits have 2 columns each
+        assert (ulim.shape[1] == 2), "ulim must have exactly 2 columns, \
+                has %d" % ulim.shape[1]
+        assert (dulim.shape[1] == 2), "dulim must have exactly 2 columns, \
+                has %d" % dulim.shape[1]
+        assert (zlim.shape[1] == 2), "zlim must have exactly 2 columns, \
+                has %d" % zlim.shape[1]
+
+        # Extract the upper and lower limits
+        ulow = ulim[:,0]
+        uhigh = ulim[:,1]
+        dulow = dulim[:,0]
+        duhigh = dulim[:,1]
+        zlow = zlim[:,0]
+        zhigh = zlim[:,1]
+
+        # Force these vectors to be 2D np arrays (in row vector form)
+        ulow = ulow.reshape(1, -1)
+        uhigh = uhigh.reshape(1, -1)
+        dulow = dulow.reshape(1, -1)
+        duhigh = duhigh.reshape(1, -1)
+        zlow = zlow.reshape(1, -1)
+        zhigh = zhigh.reshape(1, -1)
 
         # Verify that the constraint vectors given are of the right dimension
         assert (np.size(dulow) == self.__sys.numinputs), "Size of dulow \
