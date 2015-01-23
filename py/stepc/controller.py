@@ -323,15 +323,74 @@ class LinearMPCController(Controller):
 
         # SOFT CONSTRAINTS
         # Stack weights in the same order as the constraint coefficients
-        weights = np.vstack((np.tile(duhigh_weight.T, (self.__Hu, 1)),
-                             np.tile(dulow_weight.T, (self.__Hu, 1)),
-                             np.tile(uhigh_weight.T, (self.__Hu, 1)),
+        weights = np.vstack((np.tile(uhigh_weight.T, (self.__Hu, 1)),
                              np.tile(ulow_weight.T, (self.__Hu, 1)),
+                             np.tile(duhigh_weight.T, (self.__Hu, 1)),
+                             np.tile(dulow_weight.T, (self.__Hu, 1)),
                              np.tile(zhigh_weight.T, (self.__Hp, 1)),
                              np.tile(zlow_weight.T, (self.__Hp, 1))))
 
         # Check for zero-weights since they break the QP and should be removed
         assert weights.all(), "All weights must be positive real numbers"
+
+        # Store
+        self.weights = weights
+
+    def soften_constraints(self, H, G, A, B, weights):
+        """
+        The QP objective function is min_{x} x'Hx + Gx.
+
+        We are given a set of inequality constraints Ax < b, and a vector of
+        weights that are associated with these constraints.
+
+        We should adjust the phrasing of the inequality constraints such that
+        they are 'softened' as specified by the 'weights' vector. Weights of 0
+        are to be discarded (the constraint is "infinitely soft" and need not
+        be respected at all. Weights of +inf are "hard" and are never violated
+        by the QP. Weights of < 0 are not permitted and should fatally error.
+        """
+
+        # Some sanity checking
+        assert weights.all(), "All weights must be positive real numbers"
+        assert not np.isnan(weights).any(), "All weights must be numerical"
+        assert not np.isneginf(weights).any(), "Negative infinity is an invalid \
+                weight"
+
+        # Find the indices of the soft and hard constraints
+        soft_idx = np.where(np.logical_and(weights != 0, weights != np.inf))[0]
+        num_soft = np.size(soft_idx)
+        hard_idx = np.where(np.isinf(weights))
+        num_hard = np.size(hard_idx)
+
+        # Get the soft constraint weights
+        weights_soft_only = np.take(weights, soft_idx)
+
+        # Number of constraints
+        (num_constraints, num_variables) = A.shape
+        minusones = np.zeros([num_constraints, num_soft])
+        for i in range(num_soft):
+            minusones[soft_idx[i], i] = -1
+
+        # Only bother doing this if there are any soft constraints
+        if num_soft > 0:
+            # Add rows to A and B for the soft constraints
+            A = np.vstack(( np.hstack((A, minusones)),
+                            np.hstack((np.zeros([num_soft, num_variables]),
+                                -np.eye(num_soft))) ))
+            B = np.vstack((B, np.zeros([num_soft, 1])))
+
+        if weights_soft_only.size:
+            # Determine the size of the current objective function Hessian
+            [Hrows, Hcols] = H.shape
+            # Append the slack variables (epsilon) to the objective function
+            H = np.vstack(( np.hstack((H, np.zeros([Hrows, num_soft]))),
+                                 np.hstack((np.zeros([num_soft, Hcols]),
+                                     np.diagflat(weights_soft_only))) ))
+
+            # Add zeros to G (this is a 2-norm subtlety - change for 1-norm)
+            G = np.vstack((G, np.zeros([num_soft, 1])))
+
+        return (H, G, A, B)
 
     def controlmove(self, x0):
         """
@@ -365,16 +424,21 @@ class LinearMPCController(Controller):
         constraints_lhs_stacked = np.vstack((self.F, self.W, z_lhs))
         constraints_rhs_stacked = np.vstack((u_rhs, self.w, z_rhs))
 
+        # Soften the constraints
+        (H_soft, G_soft, A_soft, B_soft) = self.soften_constraints(self.__H, 
+                Geps, constraints_lhs_stacked, constraints_rhs_stacked, 
+                self.weights)
+
         # Need to convert to 'cvxopt' matrices instead of np arrays
-        cvx_H = cvxopt.matrix(self.__H)
-        cvx_Geps = cvxopt.matrix(Geps)
-        cvx_constraints_lhs_stacked = cvxopt.matrix(constraints_lhs_stacked)
-        cvx_constraints_rhs_stacked = cvxopt.matrix(constraints_rhs_stacked)
+        cvx_H = cvxopt.matrix(H_soft)
+        cvx_Geps = cvxopt.matrix(G_soft)
+        cvx_constraints_lhs_soft = cvxopt.matrix(A_soft)
+        cvx_constraints_rhs_soft = cvxopt.matrix(B_soft)
 
         # Run the optimiser (note the negative here, see Maciejowski eq. 3.10)
         cvxopt.solvers.options['show_progress'] = False
         results = cvxopt.solvers.qp(cvx_H, -cvx_Geps,
-                cvx_constraints_lhs_stacked, cvx_constraints_rhs_stacked)
+                cvx_constraints_lhs_soft, cvx_constraints_rhs_soft)
 
         # Extract result and turn it back to an np array
         uvect = np.array(results['x'])
