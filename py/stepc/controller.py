@@ -223,28 +223,30 @@ class LinearMPCController(Controller):
 
         # Extract the upper and lower limits, their weights, and force them to
         # be 2D row vectors
-        ulow = ulim[:,0].reshape(1, -1)
-        ulow_weight = ulim[:,1].reshape(1, -1)
-        uhigh = ulim[:,2].reshape(1, -1)
-        uhigh_weight = ulim[:,3].reshape(1, -1)
+        ulow = ulim[:, 0].reshape(1, -1)
+        ulow_weight = ulim[:, 1].reshape(1, -1)
+        uhigh = ulim[:, 2].reshape(1, -1)
+        uhigh_weight = ulim[:, 3].reshape(1, -1)
 
-        dulow = dulim[:,0].reshape(1, -1)
-        dulow_weight = dulim[:,1].reshape(1, -1)
-        duhigh = dulim[:,2].reshape(1, -1)
-        duhigh_weight = dulim[:,3].reshape(1, -1)
+        dulow = dulim[:, 0].reshape(1, -1)
+        dulow_weight = dulim[:, 1].reshape(1, -1)
+        duhigh = dulim[:, 2].reshape(1, -1)
+        duhigh_weight = dulim[:, 3].reshape(1, -1)
 
-        zlow = zlim[:,0].reshape(1, -1)
-        zlow_weight = zlim[:,1].reshape(1, -1)
-        zhigh = zlim[:,2].reshape(1, -1)
-        zhigh_weight = zlim[:,3].reshape(1, -1)
+        zlow = zlim[:, 0].reshape(1, -1)
+        zlow_weight = zlim[:, 1].reshape(1, -1)
+        zhigh = zlim[:, 2].reshape(1, -1)
+        zhigh_weight = zlim[:, 3].reshape(1, -1)
 
         # Verify that the constraint vectors given are of the right dimension
         assert (np.size(dulow) == self.__sys.numinputs), "Size of dulow \
                  constraint vector (%d) and number of system inputs \
-                 (%d) must be the same" % (np.size(dulow), self.__sys.numinputs)
+                 (%d) must be the same" % (np.size(dulow),
+                                           self.__sys.numinputs)
         assert (np.size(duhigh) == self.__sys.numinputs), "Size of duhigh \
                 constraint vector (%d) and number of system inputs \
-                (%d) must be the same" % (np.size(duhigh), self.__sys.numinputs)
+                (%d) must be the same" % (np.size(duhigh),
+                                          self.__sys.numinputs)
         assert (np.size(ulow) == self.__sys.numinputs), "Size of ulow \
                constraint vector (%d) and number of system inputs \
                (%d) must be the same" % (np.size(ulow), self.__sys.numinputs)
@@ -260,7 +262,6 @@ class LinearMPCController(Controller):
 
         # These matrices are used during the generation of more than one set of
         # constraint matrices
-        
         # I matrices in A are m x m (m = number of controlled inputs)
         I = np.eye(self.__sys.numinputs)
         block = np.vstack((I, -I))
@@ -359,8 +360,6 @@ class LinearMPCController(Controller):
         # Find the indices of the soft and hard constraints
         soft_idx = np.where(np.logical_and(weights != 0, weights != np.inf))[0]
         num_soft = np.size(soft_idx)
-        hard_idx = np.where(np.isinf(weights))
-        num_hard = np.size(hard_idx)
 
         # Get the soft constraint weights
         weights_soft_only = np.take(weights, soft_idx)
@@ -374,18 +373,18 @@ class LinearMPCController(Controller):
         # Only bother doing this if there are any soft constraints
         if num_soft > 0:
             # Add rows to A and B for the soft constraints
-            A = np.vstack(( np.hstack((A, minusones)),
-                            np.hstack((np.zeros([num_soft, num_variables]),
-                                -np.eye(num_soft))) ))
+            A = np.vstack((np.hstack((A, minusones)),
+                           np.hstack((np.zeros([num_soft, num_variables]),
+                                     -np.eye(num_soft)))))
             B = np.vstack((B, np.zeros([num_soft, 1])))
 
         if weights_soft_only.size:
             # Determine the size of the current objective function Hessian
             [Hrows, Hcols] = H.shape
             # Append the slack variables (epsilon) to the objective function
-            H = np.vstack(( np.hstack((H, np.zeros([Hrows, num_soft]))),
-                                 np.hstack((np.zeros([num_soft, Hcols]),
-                                     np.diagflat(weights_soft_only))) ))
+            H = np.vstack((np.hstack((H, np.zeros([Hrows, num_soft]))),
+                           np.hstack((np.zeros([num_soft, Hcols]),
+                                      np.diagflat(weights_soft_only)))))
 
             # Add zeros to G (this is a 2-norm subtlety - change for 1-norm)
             G = np.vstack((G, np.zeros([num_soft, 1])))
@@ -418,16 +417,18 @@ class LinearMPCController(Controller):
         # State constraints
         z_lhs = self.Gamma.dot(self.__phi)
         z_rhs = -self.Gamma.dot(self.__psi.dot(x0) -
-                self.__gamma.dot(self.u_last)) - self.g
+                 self.__gamma.dot(self.u_last)) - self.g
 
         # Stack the constraints
         constraints_lhs_stacked = np.vstack((self.F, self.W, z_lhs))
         constraints_rhs_stacked = np.vstack((u_rhs, self.w, z_rhs))
 
         # Soften the constraints
-        (H_soft, G_soft, A_soft, B_soft) = self.soften_constraints(self.__H, 
-                Geps, constraints_lhs_stacked, constraints_rhs_stacked, 
-                self.weights)
+        (H_soft, G_soft, A_soft, B_soft) = \
+            self.soften_constraints(self.__H,
+                                    Geps, constraints_lhs_stacked,
+                                    constraints_rhs_stacked,
+                                    self.weights)
 
         # Need to convert to 'cvxopt' matrices instead of np arrays
         cvx_H = cvxopt.matrix(H_soft)
@@ -438,7 +439,8 @@ class LinearMPCController(Controller):
         # Run the optimiser (note the negative here, see Maciejowski eq. 3.10)
         cvxopt.solvers.options['show_progress'] = False
         results = cvxopt.solvers.qp(cvx_H, -cvx_Geps,
-                cvx_constraints_lhs_soft, cvx_constraints_rhs_soft)
+                                    cvx_constraints_lhs_soft,
+                                    cvx_constraints_rhs_soft)
 
         # Extract result and turn it back to an np array
         uvect = np.array(results['x'])
