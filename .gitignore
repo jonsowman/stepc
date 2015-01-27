@@ -37,3 +37,4 @@ py/venv
 
 # Python
 *.pyc
+.ipynb_checkpoints
