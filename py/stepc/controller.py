@@ -83,6 +83,9 @@ class LinearMPCController(Controller):
         # Store the previous input
         self.u_last = 0
 
+    def set_plant(self, sys):
+        self.__sys = sys
+
     def set_prediction_horizon(self, Hp):
         self.__Hp = Hp
 
