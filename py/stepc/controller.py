@@ -447,8 +447,17 @@ class LinearMPCController(Controller):
 
         # Extract result and turn it back to an np array
         uvect = np.array(results['x'])
+        
+        # The first Hu entries are the decision variables (the rest are slack
+        # variables from the soft constraints)
+        u_control = uvect[0:self.__Hu]
+
+        # Find the predicted state trajectory
+        z_predicted = self.__psi.dot(x0) \
+                      + self.__gamma.dot(self.u_last) \
+                      + self.__phi.dot(u_control)
 
         # Return u0, the first control input and store it for next iteration
-        u0 = np.array([uvect[0]]) + self.u_last
+        u0 = np.array([u_control[0]]) + self.u_last
         self.u_last = u0
-        return u0
+        return (u0, u_control, z_predicted)
