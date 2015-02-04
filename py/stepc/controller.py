@@ -110,8 +110,18 @@ class LinearMPCController(Controller):
         """
 
         # Assert some things before we break maths
-        if not self.P or not self.Q or not self.R:
-            raise AssertionError("MPC Matrices have not been set")
+        try:
+            np.any(self.P)
+        except NameError:
+            raise AssertionError("MPC P matrix has not been set")
+        try:
+            np.any(self.Q)
+        except NameError:
+            raise AssertionError("MPC Q matrix has not been set")
+        try:
+            np.any(self.R)
+        except NameError:
+            raise AssertionError("MPC R matrix has not been set")
 
         if not self.__sys:
             raise AssertionError("A model has not been attached to \
@@ -120,19 +130,13 @@ class LinearMPCController(Controller):
         if not self.__Hp:
             raise AssertionError("A prediction horizon has not been set")
 
-        # Q & P diagonal with number of elements = number of states
-        Q = self.Q * np.eye(self.__sys.order)
-        P = self.P * np.eye(self.__sys.order)
-        # Same for R
-        R = self.R * np.eye(self.__sys.numinputs)
-
         # Qbar = diag(Q, Q, Q, ..., P)
         Qbar = np.zeros([self.__Hp * self.__sys.order, self.__Hp *
                         self.__sys.order])
         for idx in range(self.__Hp):
             start = idx * self.__sys.order
             end = start + self.__sys.order
-            Qbar[start:end, start:end] = Q
+            Qbar[start:end, start:end] = self.Q
 
         # Add P to the final diagnonal element of Qbar
         Qbar[-self.__Hp:-1, -self.__Hp:-1] = self.P
@@ -143,7 +147,7 @@ class LinearMPCController(Controller):
         for idx in range(self.__Hu):
             start = idx * self.__sys.numinputs
             end = start + self.__sys.numinputs
-            Rbar[start:end, start:end] = R
+            Rbar[start:end, start:end] = self.R
 
         # Psi = [A; A^2; A^3 ... ] with dimension mHp x n
         psi = np.zeros([self.__sys.order * self.__Hp, self.__sys.order])
